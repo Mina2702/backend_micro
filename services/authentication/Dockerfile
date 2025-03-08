@@ -1,17 +1,18 @@
-# Use Node v11.2 as the base image.
-FROM node:11.2.0-alpine
+# Sử dụng Node.js phiên bản mới nhất
+FROM node:20-alpine
 
-#Set the working directory
-WORKDIR /usr/app
+# Tạo thư mục làm việc
+WORKDIR /app
 
-# Copy everything in current directory to /server folder
-ADD . /server
+# Sao chép package.json và cài đặt dependencies
+COPY package.json .
+RUN npm install
 
-# Install dependencies
-RUN cd /server; \
-    npm install
+# Sao chép toàn bộ code
+COPY . .
 
-EXPOSE 3000
+# Mở port tương ứng với service
+EXPOSE 8080
 
-# Run node 
-CMD ["node", "/server/src/server.js"]
+# Chạy ứng dụng
+CMD ["npm", "start"]

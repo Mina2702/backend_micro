@@ -1,16 +1,13 @@
 const config = {
   name: 'User Management Service',
   baseAPIRoute: 'api',
-  port: process.env.PORT || 8080,
+  port: process.env.PORT || 8083, // Dùng port 8083 để tránh trùng
   messagebus: process.env.MESSAGE_BUS || 'amqp://rabbitmq',
   environment: process.env.ENVIRONMENT || 'dev',
   db: {
-    uri: process.env.DB_URI || 'mongodb://chalumuv-localnewsapplication.documents.azure.com:10255/?ssl=true&replicaSet=globaldb',
-    username: process.env.DB_USERNAME || 'chalumuv-localnewsapplication',
-    password: process.env.DB_PASSWORD || 'TlJ7hnd7iRck25fUFFWYgfJFdK2oSH1N2kbBQjFzb66nqFx486JP6eaCKAQrlyn3Cnwxn6MzJtF5ABeyN9CKYQ==',
+    uri: process.env.DB_URI || 'mongodb+srv://redteam:redteam@cluster0.8n4a2.mongodb.net/users_db?retryWrites=true&w=majority',
   },
-  services: {
-  },
+  services: {},
   messageTimeout: 500,
   jwtsecret: 'yoursecretkey',
 };

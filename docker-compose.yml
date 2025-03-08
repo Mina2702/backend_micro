@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   articles-management:
@@ -7,66 +7,94 @@ services:
       context: ./services/articles-management
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Thay 8080 thành 3000
     environment:
       - PORT=3000
-      - MESSAGE_BUS=amqp://rabbitmq
-    links:
+      - DB_URI=mongodb+srv://redteam:redteam@cluster0.8n4a2.mongodb.net/articles_db?retryWrites=true&w=majority
+      - MESSAGE_BUS=amqp://rabbitmq:5672
+      - ENVIRONMENT=dev
+    depends_on:
       - rabbitmq
-  
-  events-management:
-    container_name: events-management
-    build:
-      context: ./services/events-management
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3000"
-    environment:
-      - PORT=3000
-      - MESSAGE_BUS=amqp://rabbitmq
-    links:
-      - rabbitmq
-  
-  user-management:
-    container_name: user-management
-    build:
-      context: ./services/user-management
-      dockerfile: Dockerfile
-    ports:
-      - "3002:3000"
-    environment:
-      - PORT=3000
-      - MESSAGE_BUS=amqp://rabbitmq
-    links:
-      - rabbitmq
-  
+    networks:
+      - app-network
+
   authentication:
     container_name: authentication
     build:
       context: ./services/authentication
       dockerfile: Dockerfile
     ports:
-      - "3003:3000"
+      - "3003:3003"  # Thay 8081 thành 3003
     environment:
-      - PORT=3000
-      - MESSAGE_BUS=amqp://rabbitmq
-    links:
+      - PORT=3003
+      - DB_URI=mongodb+srv://redteam:redteam@cluster0.8n4a2.mongodb.net/auth_db?retryWrites=true&w=majority
+      - MESSAGE_BUS=amqp://rabbitmq:5672
+      - ENVIRONMENT=dev
+    depends_on:
       - rabbitmq
-  
+    networks:
+      - app-network
+
+  events-management:
+    container_name: events-management
+    build:
+      context: ./services/events-management
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"  # Thay 8082 thành 3001
+    environment:
+      - PORT=3001
+      - DB_URI=mongodb+srv://redteam:redteam@cluster0.8n4a2.mongodb.net/events_db?retryWrites=true&w=majority
+      - MESSAGE_BUS=amqp://rabbitmq:5672
+      - ENVIRONMENT=dev
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
   notification:
     container_name: notification
     build:
       context: ./services/notification
       dockerfile: Dockerfile
     environment:
-      - MESSAGE_BUS=amqp://rabbitmq
+      - MESSAGE_BUS=amqp://rabbitmq:5672
+      - ENVIRONMENT=dev
       - EMAIL_SERVICE=gmail
       - EMAIL_ID=noreply.localnewsapplication@gmail.com
       - EMAIL_PASSWORD=Testing0*
       - ADMIN_EMAIL=localnewsapp340ct@gmail.com
-    links:
+    depends_on:
       - rabbitmq
+    networks:
+      - app-network
+
+  user-management:
+    container_name: user-management
+    build:
+      context: ./services/user-management
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"  # Thay 8083 thành 3002
+    environment:
+      - PORT=3002
+      - DB_URI=mongodb+srv://redteam:redteam@cluster0.8n4a2.mongodb.net/users_db?retryWrites=true&w=majority
+      - MESSAGE_BUS=amqp://rabbitmq:5672
+      - ENVIRONMENT=dev
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
 
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:3.7.4
+    image: rabbitmq:3.12-management
+    ports:
+      - "15672:5672"  # Giữ port đã sửa để tránh lỗi
+      - "15673:15672"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

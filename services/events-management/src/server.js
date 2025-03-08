@@ -1,18 +1,27 @@
 /* eslint-disable no-console */
-
-// Init the environment variables and server configurations
 require('dotenv').config();
 
-// Import the required packages
-const Mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const config = require('./environment/config');
 const app = require('./app');
 
-// Init Database Connection
-Mongoose.connect(config.db.uri, { user: config.db.username, pass: config.db.password });
-Mongoose.connection.on('error', console.error);
+// Kết nối MongoDB Atlas
+async function startServer() {
+  try {
+    await mongoose.connect(config.db.uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('Connected to MongoDB Atlas');
 
-// Run the API Server
-app.listen(config.port, () => {
-  console.log(config.startedMessage);
-});
+    // Run the API Server
+    app.listen(config.port, () => {
+      console.log(config.startedMessage);
+    });
+  } catch (err) {
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1);
+  }
+}
+
+startServer();
